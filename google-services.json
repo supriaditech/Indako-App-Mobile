@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "959008801346",
+    "project_id": "supriaditech-6a249",
+    "storage_bucket": "supriaditech-6a249.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:959008801346:android:68ae0b96fbfb34950fa3db",
+        "android_client_info": {
+          "package_name": "com.indako.firebase"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "959008801346-58pec686hoeb9q49h825bi0f9td534bs.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.indako.firebase",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "959008801346-f5ojl6p06cb8n19118mra9vc96mug9fr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAuUrONcN0thKG-YR14NW1NSLb1xk3YeSc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "959008801346-f5ojl6p06cb8n19118mra9vc96mug9fr.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "959008801346-qkin87803pnc5f14at3808ieb8qu5pr5.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.indako.firebase"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

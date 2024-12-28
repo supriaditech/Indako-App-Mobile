@@ -6,8 +6,9 @@ import {
   StyleSheet,
 } from "react-native";
 import React from "react";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
+import { router } from "expo-router";
 
 interface FormLoginProps {
   email: string;
@@ -15,6 +16,7 @@ interface FormLoginProps {
   password: string;
   setPassword: (password: string) => void;
   signIn: () => Promise<void>;
+  loading: boolean;
 }
 
 const FormLogin = ({
@@ -23,11 +25,12 @@ const FormLogin = ({
   password,
   setPassword,
   signIn,
+  loading,
 }: FormLoginProps) => {
   return (
     <View style={styles.countainerFormLoginStyle}>
       <View>
-        <Text style={styles.textEmailStyle}>Email Address/No Hp</Text>
+        <Text style={styles.textEmailStyle}>Email Address</Text>
         <View style={styles.countainerInputStyle}>
           <MaterialCommunityIcons
             name="email-outline"
@@ -46,8 +49,8 @@ const FormLogin = ({
       <View>
         <Text style={styles.titlePasswordInputStyle}>Password</Text>
         <View style={styles.countainerInputStyle}>
-          <MaterialCommunityIcons
-            name="email-outline"
+          <MaterialIcons
+            name="password"
             size={24}
             color="black"
             style={styles.iconInputStyle}
@@ -62,11 +65,13 @@ const FormLogin = ({
         </View>
       </View>
       <View>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push("/forgot-password")}>
           <Text style={styles.forgotPasswordStyle}>Forgot Password?</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.buttonLoginStyle} onPress={signIn}>
-          <Text style={styles.textButtonLoginStyle}>Login</Text>
+          <Text style={styles.textButtonLoginStyle}>
+            {loading ? "Loading..." : "Login"}
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -84,7 +89,7 @@ const styles = StyleSheet.create({
   buttonLoginStyle: {
     backgroundColor: Colors.light.darkBlue,
     paddingVertical: 14,
-    marginTop: 10,
+    marginTop: 20,
     borderRadius: 20,
   },
   forgotPasswordStyle: {
@@ -121,7 +126,7 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins-Regular",
   },
   countainerFormLoginStyle: {
-    paddingTop: 36,
+    paddingTop: 20,
     paddingHorizontal: 20,
     width: "100%",
     flexDirection: "column",

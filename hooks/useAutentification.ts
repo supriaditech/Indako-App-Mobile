@@ -11,17 +11,17 @@ const useAutentification = () => {
   const [phoneNumber, setPhoneNumber] = useState<string>("");
   const [verificationCode, setVerificationCode] = useState<string>("");
   const [confirmationResult, setConfirmationResult] = useState<any>(null);
-
+  const [loading, setLoading] = useState<boolean>(false);
   const signIn = async () => {
+    setLoading(true);
     try {
       const user = await auth().signInWithEmailAndPassword(email, password);
-      console.log(user);
+      setLoading(false);
+
       if (user) router.replace("/(tabs)");
     } catch (error: any) {
-      console.log(error);
-
+      setLoading(false);
       let errorMessage: string;
-
       // Memeriksa jenis kesalahan dan memberikan pesan yang sesuai
       if (error.code === "auth/invalid-email") {
         errorMessage = "Invalid email format.";
@@ -144,6 +144,7 @@ const useAutentification = () => {
     handleLogout,
     signInWithPhone,
     confirmCode,
+    loading,
   };
 };
 

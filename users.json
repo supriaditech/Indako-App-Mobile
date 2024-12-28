@@ -1,0 +1,28 @@
+{
+  "users": {
+    "userId1": {
+      "firstName": "Supri",
+      "lastName": "Adi",
+      "email": "supriadi.tech@gmail.com",
+      "phoneNumber": "82277280453"
+    },
+    "userId2": {
+      "firstName": "Budi",
+      "lastName": "Santoso",
+      "email": "budi.santoso@example.com",
+      "phoneNumber": "81234567890"
+    },
+    "userId3": {
+      "firstName": "Siti",
+      "lastName": "Aisyah",
+      "email": "siti.aisyah@example.com",
+      "phoneNumber": "81345678901"
+    },
+    "userId4": {
+      "firstName": "Andi",
+      "lastName": "Pratama",
+      "email": "andi.pratama@example.com",
+      "phoneNumber": "81456789012"
+    }
+  }
+}

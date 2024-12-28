@@ -5,13 +5,19 @@ import { useRouter } from "expo-router";
 
 interface TabAuthProps {
   route: string;
+  isEmailLogin: boolean;
 }
 
-const TabAuth = ({ route }: TabAuthProps) => {
+const TabAuth = ({ route, isEmailLogin }: TabAuthProps) => {
   const router = useRouter();
 
   return (
-    <View style={styles.containerTabStyle}>
+    <View
+      style={[
+        styles.containerTabStyle,
+        { paddingTop: isEmailLogin ? 80 : 140 },
+      ]}
+    >
       <Image
         source={require("../../assets/images/indako_logo.png")}
         style={styles.imageLogoStyle}
@@ -71,7 +77,6 @@ const styles = StyleSheet.create({
     width: "100%",
     flexDirection: "column",
     alignItems: "center",
-    paddingTop: 140,
     borderRadius: 20,
     paddingHorizontal: 20,
     backgroundColor: "white",

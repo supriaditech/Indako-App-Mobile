@@ -6,8 +6,10 @@ import {
   MaterialIcons,
 } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
+import { useAuth } from "@/contexts/AuthContext";
 
 const HeaderHome = () => {
+  const { userBranch } = useAuth();
   return (
     <View style={styles.countainerLocationStyle}>
       <TouchableOpacity>
@@ -18,16 +20,11 @@ const HeaderHome = () => {
             style={styles.colorDarkBlue}
           />
           <View>
-            <Text style={styles.textTitleMap}>INDAKO TRADING COY</Text>
+            <Text style={styles.textTitleMap}>{userBranch?.office_name}</Text>
             <Text style={styles.textAddressMapStyle}>
-              Jl. Ngumban Surbakti No.25
+              {userBranch?.location}
             </Text>
           </View>
-          <MaterialIcons
-            name="keyboard-arrow-down"
-            size={30}
-            style={styles.colorDarkBlue}
-          />
         </View>
       </TouchableOpacity>
 

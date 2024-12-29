@@ -18,7 +18,6 @@ const useForgotPassword = () => {
       });
       router.push("/login");
     } catch (error: any) {
-      console.log(error);
       showToast({
         message: "Gagal mengirim email reset password: " + error.message,
         type: "error",

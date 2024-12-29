@@ -5,7 +5,7 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from "react-native";
-import React from "react";
+import React, { useState } from "react";
 import {
   AntDesign,
   Feather,
@@ -13,8 +13,12 @@ import {
   MaterialIcons,
 } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
-import { router } from "expo-router";
 import { useRegister } from "@/hooks/useRegister";
+import DropdownGender from "./DropdownGender";
+import DropdownBanches from "./DropdownBanches";
+import DropdownJabatan from "./DropdownJabatan";
+import { router } from "expo-router";
+import { useAuth } from "@/contexts/AuthContext";
 
 const FormRegister = () => {
   const {
@@ -30,9 +34,18 @@ const FormRegister = () => {
     setPassword,
     passwordConfirm,
     setPasswordConfirm,
+    gender,
+    setGender,
+    jabatan,
+    setJabatan,
+    selectedBranch,
+    setSelectedBranch,
     register,
     loading,
   } = useRegister();
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   return (
     <View style={styles.countainerFormLoginStyle}>
       <View>
@@ -46,7 +59,7 @@ const FormRegister = () => {
           />
           <TextInput
             style={styles.textInputStyle}
-            placeholder="email"
+            placeholder="First Name"
             value={firstName}
             onChangeText={setFirstName}
           />
@@ -69,6 +82,19 @@ const FormRegister = () => {
           />
         </View>
       </View>
+
+      {/* Jenis Kelamin (Gender) */}
+      <DropdownGender gender={gender} setGender={setGender} />
+
+      {/* Tempat kerja */}
+      <DropdownBanches
+        selectedBranch={selectedBranch}
+        setSelectedBranch={setSelectedBranch}
+      />
+
+      {/* Jabatan */}
+      <DropdownJabatan jabatan={jabatan} setJabatan={setJabatan} />
+
       <View>
         <Text style={styles.titlePasswordInputStyle}>Email</Text>
         <View style={styles.countainerInputStyle}>
@@ -124,15 +150,17 @@ const FormRegister = () => {
               placeholder="*********"
               value={password}
               onChangeText={setPassword}
-              secureTextEntry
+              secureTextEntry={!showPassword}
             />
           </View>
-          <Feather
-            name="eye-off"
-            size={24}
-            color="black"
-            style={styles.iconInputStyle}
-          />
+          <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+            <Feather
+              name={showPassword ? "eye" : "eye-off"}
+              size={24}
+              color="black"
+              style={styles.iconInputStyle}
+            />
+          </TouchableOpacity>
         </View>
       </View>
       <View>
@@ -164,23 +192,39 @@ const FormRegister = () => {
               placeholder="*********"
               value={passwordConfirm}
               onChangeText={setPasswordConfirm}
-              secureTextEntry
+              secureTextEntry={!showPasswordConfirm}
             />
           </View>
-          <Feather
-            name="eye-off"
-            size={24}
-            color="black"
-            style={styles.iconInputStyle}
-          />
+          <TouchableOpacity
+            onPress={() => setShowPasswordConfirm(!showPasswordConfirm)}
+          >
+            <Feather
+              name={showPasswordConfirm ? "eye" : "eye-off"}
+              size={24}
+              color="black"
+              style={styles.iconInputStyle}
+            />
+          </TouchableOpacity>
         </View>
       </View>
 
       <View>
-        <TouchableOpacity onPress={() => router.push("/login")}>
-          <Text style={styles.forgotPasswordStyle}>Back SignIn</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.buttonLoginStyle} onPress={register}>
+        <Text style={styles.forgotPasswordStyle}>
+          Dengan mendaftar, Anda menyetujui segala{" "}
+          <TouchableOpacity>
+            <Text style={styles.termsConditionsStyle}>
+              Terms and Conditions
+            </Text>
+          </TouchableOpacity>
+        </Text>
+        <TouchableOpacity
+          style={styles.buttonLoginStyle}
+          onPress={() => {
+            register(() => {
+              router.replace("/(tabs)"); // Navigasi ke aplikasi utama setelah pendaftaran
+            });
+          }}
+        >
           <Text style={styles.textButtonLoginStyle}>
             {loading ? "Loading..." : "Register"}
           </Text>
@@ -193,6 +237,10 @@ const FormRegister = () => {
 export default FormRegister;
 
 const styles = StyleSheet.create({
+  termsConditionsStyle: {
+    color: "blue", // Warna biru untuk Terms and Conditions
+    textDecorationLine: "underline", // Menambahkan garis bawah (opsional)
+  },
   textButtonLoginStyle: {
     textAlign: "center",
     fontFamily: "Poppins-SemiBold",
@@ -205,8 +253,9 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   forgotPasswordStyle: {
-    textAlign: "right",
-    fontFamily: "Poppins-SemiBold",
+    textAlign: "center",
+    fontFamily: "Poppins-Regular",
+    fontSize: 12,
   },
   titlePasswordInputStyle: {
     paddingBottom: 4,
@@ -216,7 +265,6 @@ const styles = StyleSheet.create({
   textInputStyle: {
     color: Colors.light.darkBlue,
     fontFamily: "Poppins-Regular",
-
     width: "80%",
   },
   iconInputStyle: {
@@ -250,5 +298,10 @@ const styles = StyleSheet.create({
     width: "100%",
     flexDirection: "column",
     gap: 28,
+  },
+  pickerStyle: {
+    height: 50,
+    width: "80%",
+    color: Colors.light.darkBlue,
   },
 });

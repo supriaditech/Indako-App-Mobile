@@ -12,10 +12,10 @@ import React from "react";
 import TabAuth from "@/components/Global/TabAuth";
 import { useRoute } from "@react-navigation/native";
 import FormRegister from "@/components/Register/FormRegister";
+import { useCompanyBranches } from "@/hooks/useCompanyBranches";
 
 const Register = () => {
   const route = useRoute();
-
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="black" />

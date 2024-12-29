@@ -19,7 +19,8 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#ffffff",
+        "permissions": ["CAMERA", "ACCESS_FINE_LOCATION"]
       },
       "package": "com.indako.firebase",
       "googleServicesFile": "./google-services.json"
@@ -46,6 +47,14 @@
           "ios": {
             "useFrameworks": "static"
           }
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
+          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
+          "recordAudioAndroid": true
         }
       ],
       "@react-native-firebase/app",

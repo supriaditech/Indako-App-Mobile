@@ -1,14 +1,21 @@
 import { Redirect, router, Tabs, useRouter, useSegments } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Platform } from "react-native";
+import { ActivityIndicator, Platform } from "react-native";
 
 import { HapticTab } from "@/components/HapticTab";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import TabBarBackground from "@/components/ui/TabBarBackground";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
-import { Feather, FontAwesome } from "@expo/vector-icons";
+import {
+  AntDesign,
+  Feather,
+  FontAwesome,
+  MaterialIcons,
+} from "@expo/vector-icons";
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
+import { useAuth } from "@/contexts/AuthContext";
+
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const [initializing, setInitializing] = useState(true);
@@ -17,7 +24,6 @@ export default function TabLayout() {
   const segments = useSegments();
 
   const onAuthStateChanged = (user: FirebaseAuthTypes.User | null) => {
-    console.log("onAuthStateChanged", user);
     setUser(user);
     if (initializing) setInitializing(false);
   };
@@ -34,14 +40,20 @@ export default function TabLayout() {
 
     if (user && !inAuthGroup) {
       router.replace("/(tabs)"); // Ganti dengan rute beranda Anda
+      router.reload();
     } else if (!user && inAuthGroup) {
       router.replace("/login"); // Ganti dengan rute login Anda
     }
-  }, [user, initializing]);
+  }, [user, initializing, segments]);
+
+  if (initializing) {
+    return <ActivityIndicator size="large" color="#0000ff" />; // Tampilkan indikator pemuatan
+  }
 
   if (!user) {
     return null;
   }
+
   return (
     <Tabs
       screenOptions={{
@@ -51,7 +63,6 @@ export default function TabLayout() {
         tabBarBackground: TabBarBackground,
         tabBarStyle: Platform.select({
           ios: {
-            // Use a transparent background on iOS to show the blur effect
             position: "absolute",
           },
           default: {},
@@ -73,6 +84,24 @@ export default function TabLayout() {
           title: "Explore",
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="paperplane.fill" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="(team)"
+        options={{
+          title: "Team",
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons name="people-outline" size={24} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="(attendance)"
+        options={{
+          title: "Attendance",
+          tabBarIcon: ({ color }) => (
+            <AntDesign name="filetext1" size={24} color={color} />
           ),
         }}
       />

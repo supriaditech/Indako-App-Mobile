@@ -1,8 +1,10 @@
 import { View, Text, Image, StyleSheet } from "react-native";
 import React from "react";
 import { Colors } from "../../constants/Colors";
+import { useAuth } from "@/contexts/AuthContext";
 
 const PhotoProfile = () => {
+  const { user, loading, userBranch } = useAuth();
   return (
     <View style={styles.CountainerPhotoProfileStyle}>
       <View style={styles.backgroundPhotoProfileStyle}>
@@ -12,9 +14,11 @@ const PhotoProfile = () => {
         />
       </View>
       <View style={styles.countainerDescriptionProfileStyle}>
-        <Text style={styles.textWhiteStyle}>Direktur</Text>
-        <Text style={styles.textNameStyle}>Supriadi</Text>
-        <Text style={styles.textWhiteStyle}>INDAKO TRADING COY</Text>
+        <Text style={styles.textWhiteStyle}>{user?.jabatan}</Text>
+        <Text style={styles.textNameStyle}>
+          {user?.firstName} {user?.lastName}
+        </Text>
+        <Text style={styles.textWhiteStyle}>{userBranch?.office_name}</Text>
       </View>
     </View>
   );

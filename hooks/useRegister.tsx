@@ -1,10 +1,12 @@
-// useRegister.js
 import { useState } from "react";
 import { showToast } from "@/components/ui/toast"; // Pastikan Anda memiliki ini untuk umpan balik
-import auth from "@react-native-firebase/auth"; // Menggunakan Firebase Auth
-import firestore from "@react-native-firebase/firestore"; // Mengimpor Firestore
+import auth from "@react-native-firebase/auth";
+import firestore from "@react-native-firebase/firestore";
 import { router } from "expo-router";
-import { FirebaseError } from "@firebase/util"; // Mengimpor FirebaseError
+import { FirebaseError } from "@firebase/util";
+import { useAuth, User } from "@/contexts/AuthContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { CompanyBranch } from "./useCompanyBranches";
 
 const useRegister = () => {
   const [firstName, setFirstName] = useState("");
@@ -14,8 +16,49 @@ const useRegister = () => {
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [loading, setLoading] = useState(false);
+  const [gender, setGender] = useState<string>("");
+  const [jabatan, setJabatan] = useState<string>("");
+  const [selectedBranch, setSelectedBranch] = useState<CompanyBranch | null>(
+    null
+  );
+  const { setUser } = useAuth();
 
-  const register = async () => {
+  const isValidEmail = (email: string) => {
+    const trimmedEmail = email.trim(); // Hapus kelebihan spasi
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Regex untuk memvalidasi email
+    return emailRegex.test(trimmedEmail);
+  };
+
+  const register = async (onSuccess: () => void) => {
+    if (
+      !firstName ||
+      !lastName ||
+      !email ||
+      !phoneNumber ||
+      !password ||
+      !passwordConfirm ||
+      !gender ||
+      !jabatan ||
+      !selectedBranch
+    ) {
+      showToast({
+        message: "Semua field harus diisi!",
+        type: "error",
+        position: "top",
+      });
+      return;
+    }
+
+    const trimmedEmail = email.trim(); // Hapus spasi setelah @gmail.com
+    if (!isValidEmail(trimmedEmail)) {
+      showToast({
+        message: "Format email tidak valid!",
+        type: "error",
+        position: "top",
+      });
+      return;
+    }
+
     if (password !== passwordConfirm) {
       showToast({
         message: "Kata sandi tidak cocok!",
@@ -26,58 +69,49 @@ const useRegister = () => {
     }
 
     setLoading(true);
-    console.log("=============");
+
     try {
-      // Membuat pengguna dengan email dan kata sandi
       const userCredential = await auth().createUserWithEmailAndPassword(
-        email,
+        trimmedEmail,
         password
       );
-      console.log("userCredential", userCredential);
-
-      // Menyimpan informasi tambahan pengguna ke Firestore
-      await firestore().collection("users").doc(userCredential.user.uid).set({
+      const uid = userCredential.user.uid;
+      const userData: User = {
+        uid,
+        email: trimmedEmail,
         firstName,
         lastName,
         phoneNumber,
-        email,
-      });
+        gender,
+        jabatan,
+        branch: selectedBranch.id,
+      };
+      await firestore().collection("users").doc(uid).set(userData);
+      setUser(userData);
+      await AsyncStorage.setItem("user", JSON.stringify(userData));
 
-      console.log("Data pengguna berhasil disimpan ke Firestore");
-
-      // Menampilkan pesan sukses dan navigasi
       showToast({
         message: "Pendaftaran berhasil!",
         type: "success",
         position: "top",
       });
-      router.replace("/(tabs)"); // Navigasi ke aplikasi utama setelah pendaftaran
+      onSuccess();
     } catch (error) {
-      console.log("error", error);
-      let errorMessage =
-        "Pendaftaran gagal: Terjadi kesalahan yang tidak terduga.";
+      let errorMessage = "Pendaftaran gagal.";
       if (error instanceof FirebaseError) {
-        // Menangani kesalahan spesifik Firebase
         switch (error.code) {
           case "auth/email-already-in-use":
-            errorMessage = "Alamat email ini sudah digunakan.";
+            errorMessage = "Email ini sudah digunakan.";
             break;
           case "auth/invalid-email":
             errorMessage = "Format email tidak valid.";
             break;
           case "auth/weak-password":
-            errorMessage = "Kata sandi harus terdiri dari minimal 6 karakter.";
-            break;
-          default:
-            errorMessage = "Pendaftaran gagal: " + error.message;
+            errorMessage = "Kata sandi terlalu lemah.";
             break;
         }
       }
-      showToast({
-        message: errorMessage,
-        type: "error",
-        position: "top",
-      });
+      showToast({ message: errorMessage, type: "error", position: "top" });
     } finally {
       setLoading(false);
     }
@@ -98,6 +132,12 @@ const useRegister = () => {
     setPasswordConfirm,
     register,
     loading,
+    gender,
+    setGender,
+    jabatan,
+    setJabatan,
+    selectedBranch,
+    setSelectedBranch,
   };
 };
 

@@ -56,7 +56,6 @@ const useAutentification = () => {
         position: "top",
       });
     } catch (error: any) {
-      console.log(error);
       showToast({
         message: "Failed to send verification code: " + error.message,
         type: "error",
@@ -69,10 +68,8 @@ const useAutentification = () => {
     if (confirmationResult) {
       try {
         const user = await confirmationResult.confirm(verificationCode);
-        console.log(user);
         if (user) router.replace("/(tabs)");
       } catch (error: any) {
-        console.log(error);
         showToast({
           message: "Code confirmation failed: " + error.message,
           type: "error",
@@ -93,7 +90,6 @@ const useAutentification = () => {
       const user = await auth().createUserWithEmailAndPassword(email, password);
       if (user) router.replace("/(tabs)");
     } catch (error: any) {
-      console.log(error);
       showToast({
         message: "Sign up failed: " + error.message,
         type: "error",
@@ -113,14 +109,12 @@ const useAutentification = () => {
       router.replace("/login"); // Navigasi ke halaman login setelah logout
     } catch (error: unknown) {
       if (error instanceof FirebaseError) {
-        console.log(error);
         showToast({
           message: "Logout failed: " + error.message,
           type: "error",
           position: "top",
         });
       } else {
-        console.log("An unexpected error occurred:", error);
         showToast({
           message: "Logout failed: An unexpected error occurred.",
           type: "error",

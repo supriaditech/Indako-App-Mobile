@@ -78,15 +78,7 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: "Explore",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="paperplane.fill" color={color} />
-          ),
-        }}
-      />
+
       <Tabs.Screen
         name="(team)"
         options={{
@@ -102,6 +94,15 @@ export default function TabLayout() {
           title: "Attendance",
           tabBarIcon: ({ color }) => (
             <AntDesign name="filetext1" size={24} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="(inbox)"
+        options={{
+          title: "Inbox",
+          tabBarIcon: ({ color }) => (
+            <Feather name="inbox" size={24} color={color} />
           ),
         }}
       />

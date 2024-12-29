@@ -66,7 +66,11 @@ const ListInbox = ({ inboxData, loading }: ListInboxProps) => {
         onChangeText={setSearchQuery}
       />
       {loading ? (
-        <ActivityIndicator size="large" color="blue" />
+        <View
+          style={{ alignItems: "center", justifyContent: "center", flex: 1 }}
+        >
+          <ActivityIndicator size="large" />
+        </View>
       ) : (
         <FlatList
           showsVerticalScrollIndicator={false}

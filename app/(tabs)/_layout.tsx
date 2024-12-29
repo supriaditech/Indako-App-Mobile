@@ -1,6 +1,6 @@
 import { Redirect, router, Tabs, useRouter, useSegments } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, Platform } from "react-native";
+import { ActivityIndicator, Platform, View } from "react-native";
 
 import { HapticTab } from "@/components/HapticTab";
 import { IconSymbol } from "@/components/ui/IconSymbol";
@@ -47,7 +47,11 @@ export default function TabLayout() {
   }, [user, initializing, segments]);
 
   if (initializing) {
-    return <ActivityIndicator size="large" color="#0000ff" />; // Tampilkan indikator pemuatan
+    return (
+      <View style={{ alignItems: "center", justifyContent: "center", flex: 1 }}>
+        <ActivityIndicator size="large" />
+      </View>
+    ); // Tampilkan indikator pemuatan
   }
 
   if (!user) {

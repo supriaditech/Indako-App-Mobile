@@ -21,6 +21,24 @@ const Layout = (): React.JSX.Element => (
         title: "Account",
       }}
     />
+    <Stack.Screen
+      name="change-password"
+      options={{
+        title: "Change Password",
+      }}
+    />
+    <Stack.Screen
+      name="about"
+      options={{
+        title: "About",
+      }}
+    />
+    <Stack.Screen
+      name="terms-and-conditions"
+      options={{
+        title: "TermsAndAonditions",
+      }}
+    />
   </Stack>
 );
 

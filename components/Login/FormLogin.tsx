@@ -5,8 +5,12 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from "react-native";
-import React from "react";
-import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+import React, { useState } from "react";
+import {
+  Entypo,
+  MaterialCommunityIcons,
+  MaterialIcons,
+} from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
 import { router } from "expo-router";
 
@@ -27,11 +31,19 @@ const FormLogin = ({
   signIn,
   loading,
 }: FormLoginProps) => {
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+
+  const handleEmailChange = (input: string) => {
+    // Menghapus spasi berlebih dan memvalidasi email
+    const trimmedEmail = input.trim();
+    setEmail(trimmedEmail);
+  };
+
   return (
-    <View style={styles.countainerFormLoginStyle}>
+    <View style={styles.containerFormLoginStyle}>
       <View>
         <Text style={styles.textEmailStyle}>Email Address</Text>
-        <View style={styles.countainerInputStyle}>
+        <View style={styles.containerInputStyle}>
           <MaterialCommunityIcons
             name="email-outline"
             size={24}
@@ -42,13 +54,14 @@ const FormLogin = ({
             style={styles.textInputStyle}
             placeholder="email"
             value={email}
-            onChangeText={setEmail}
+            onChangeText={handleEmailChange} // Menggunakan fungsi baru untuk validasi
+            keyboardType="email-address" // Menampilkan keyboard email
           />
         </View>
       </View>
       <View>
         <Text style={styles.titlePasswordInputStyle}>Password</Text>
-        <View style={styles.countainerInputStyle}>
+        <View style={styles.containerInputStyle}>
           <MaterialIcons
             name="password"
             size={24}
@@ -60,8 +73,15 @@ const FormLogin = ({
             placeholder="password"
             value={password}
             onChangeText={setPassword}
-            secureTextEntry
+            secureTextEntry={!showPassword} // Mengatur visibilitas password
           />
+          <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+            <Entypo
+              name={showPassword ? "eye" : "eye-with-line"}
+              size={20}
+              color="gray"
+            />
+          </TouchableOpacity>
         </View>
       </View>
       <View>
@@ -104,14 +124,13 @@ const styles = StyleSheet.create({
   textInputStyle: {
     color: Colors.light.darkBlue,
     fontFamily: "Poppins-Regular",
-
-    width: "100%",
+    width: "80%",
   },
   iconInputStyle: {
     color: Colors.light.darkBlue,
     fontFamily: "Poppins-Regular",
   },
-  countainerInputStyle: {
+  containerInputStyle: {
     flexDirection: "row",
     paddingRight: 1,
     paddingBottom: 4,
@@ -125,7 +144,7 @@ const styles = StyleSheet.create({
     color: Colors.light.gray,
     fontFamily: "Poppins-Regular",
   },
-  countainerFormLoginStyle: {
+  containerFormLoginStyle: {
     paddingTop: 20,
     paddingHorizontal: 20,
     width: "100%",

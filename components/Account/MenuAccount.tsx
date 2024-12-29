@@ -15,11 +15,17 @@ const MenuAccount = () => {
   const { handleLogout } = useAutentification();
   return (
     <View style={{ paddingHorizontal: 40, flexDirection: "column", gap: 14 }}>
-      <TouchableOpacity style={styles.buttonStyle}>
+      <TouchableOpacity
+        style={styles.buttonStyle}
+        onPress={() => router.push("/change-password")}
+      >
         <Feather name="lock" size={24} color="black" />
         <Text style={styles.textButtonStyle}>Change Password</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.buttonStyle}>
+      <TouchableOpacity
+        style={styles.buttonStyle}
+        onPress={() => router.push("/about")}
+      >
         <MaterialIcons name="info-outline" size={24} color="black" />
         <Text style={styles.textButtonStyle}>About Us</Text>
       </TouchableOpacity>
@@ -31,7 +37,7 @@ const MenuAccount = () => {
         />
         <Text
           style={styles.textButtonStyle}
-          onPress={() => router.push("/login")}
+          onPress={() => router.push("/terms-and-conditions")}
         >
           Terms and Conditions
         </Text>

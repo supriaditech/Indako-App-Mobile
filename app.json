@@ -23,7 +23,12 @@
         "permissions": ["CAMERA", "ACCESS_FINE_LOCATION"]
       },
       "package": "com.indako.firebase",
-      "googleServicesFile": "./google-services.json"
+      "googleServicesFile": "./google-services.json",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyCYtTIksvGId0tvY9-LRhp-1kWirNxACmU"
+        }
+      }
     },
     "web": {
       "bundler": "metro",

@@ -26,7 +26,6 @@ const ManagerPage: React.FC = () => {
   const { managerId } = useLocalSearchParams<{ managerId: string }>();
   const [manager, setManager] = useState<OrganizationMember | null>(null);
   const [supervisors, setSupervisors] = useState<OrganizationMember[]>([]);
-  console.log(supervisors);
   const fetchManagerDetails = async () => {
     try {
       const managerDoc = await firestore().collection("organization").get();
@@ -38,7 +37,6 @@ const ManagerPage: React.FC = () => {
         const managerData = data.find((item) => item.id === managerId) || null;
         setManager(managerData);
       } else {
-        console.log(`Manager with ID ${managerId} not found in Firestore.`);
         setManager(null);
       }
 

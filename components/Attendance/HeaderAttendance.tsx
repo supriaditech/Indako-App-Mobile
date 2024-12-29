@@ -18,20 +18,6 @@ const HeaderAttendance = () => {
           </Text>
         </View>
       </View>
-      <View style={{ padding: 20 }}>
-        <Text
-          style={{
-            textAlign: "center",
-            fontFamily: "Poppins-SemiBold",
-            fontSize: 24,
-          }}
-        >
-          {user?.firstName} {user?.lastName}
-        </Text>
-        <Text style={{ textAlign: "center", fontFamily: "Poppins-Regular" }}>
-          {user?.email}
-        </Text>
-      </View>
     </View>
   );
 };

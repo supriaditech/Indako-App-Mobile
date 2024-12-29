@@ -1,104 +1,121 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   View,
-  Text,
   StyleSheet,
+  Text,
   StatusBar,
   TouchableOpacity,
+  Image,
+  ScrollView,
 } from "react-native";
+import { CameraType, CameraView, useCameraPermissions } from "expo-camera";
+import HeaderAttendance from "@/components/Attendance/HeaderAttendance";
 import { SafeAreaView } from "react-native-safe-area-context";
-import {
-  Camera,
-  CameraType,
-  CameraView,
-  useCameraPermissions,
-} from "expo-camera"; // Gunakan Camera dari expo-camera
+import { Colors } from "@/constants/Colors";
+import * as Location from "expo-location";
+import MapView, { Marker } from "react-native-maps";
 import { AntDesign } from "@expo/vector-icons";
-import * as faceApi from "face-api.js"; // Import face-api.js
-import HeaderAttendance from "@/components/Attendance/HeaderAttendance"; // Komponen Header yang sudah ada
-import { Colors } from "@/constants/Colors"; // Untuk warna tema
+import auth from "@react-native-firebase/auth";
+import firestore from "@react-native-firebase/firestore";
+import Modal from "react-native-modal";
 
-const Attendance = () => {
-  const [facing, setFacing] = useState<CameraType>("back");
+export default function AttendanceScreen() {
+  const [facing, setFacing] = useState<CameraType>("front");
+  const [photo, setPhoto] = useState(null);
+  const [location, setLocation] = useState<any>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const cameraRef = useRef<any>(null);
   const [permission, requestPermission] = useCameraPermissions();
-  const [isCameraReady, setIsCameraReady] = useState(false);
-  const [detections, setDetections] = useState<any>(null);
-  const cameraRef = useRef<any>(null); // Referensi untuk Camera
-  const [mlAlgorithm, setMlAlgorithm] = useState(false);
-  useEffect(() => {
-    console.log("checkkkk useEffect"); // Debugging untuk memastikan useEffect berjalan
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertData, setAlertData] = useState({ title: "", message: "" });
 
-    const loadModels = async () => {
-      try {
-        console.log("Model loading started...");
+  const toggleCameraFacing = () => {
+    setFacing(facing === "back" ? "front" : "back");
+  };
 
-        // Pastikan menggunakan path yang benar dan cek jika ada kesalahan dalam pemuatan
-        await faceApi.nets.ssdMobilenetv1.loadFromUri(
-          "../../../assets/models/"
-        );
-        console.log("Model ssdMobilenetv1 loaded");
-
-        await faceApi.nets.faceLandmark68Net.loadFromUri(
-          "../../../assets/models/"
-        );
-        console.log("Model faceLandmark68Net loaded");
-
-        await faceApi.nets.faceRecognitionNet.loadFromUri(
-          "../../../assets/models/"
-        );
-        console.log("Model faceRecognitionNet loaded");
-
-        // Set mlAlgorithm setelah semua model berhasil dimuat
-        setMlAlgorithm(true);
-        console.log("Models Loaded!");
-      } catch (error) {
-        console.error("Error loading models: ", error); // Error handling jika loading gagal
-      }
-    };
-
-    loadModels();
-  }, []); // Pastikan useEffect hanya dijalankan sekali saat komponen dimount
-
-  useEffect(() => {
-    if (mlAlgorithm) {
-      const interval = setInterval(() => {
-        detectFace();
-      }, 1000); // Deteksi wajah setiap 1 detik
-
-      return () => clearInterval(interval); // Bersihkan interval saat komponen dibersihkan
-    } // Bersihkan interval saat komponen dibersihkan
-  }, [mlAlgorithm]);
-
-  const detectFace = async () => {
-    console.log("==", cameraRef);
-    console.log("==sss", cameraRef.current);
-    console.log("==sss", mlAlgorithm);
+  const takePhoto = async () => {
     if (cameraRef.current) {
-      const video = cameraRef.current.recordAsync(); // Mendapatkan stream video dari Camera
-      console.log("==========", video);
-      if (video) {
-        // Gambar video stream ke dalam canvas
-
-        // Deteksi wajah menggunakan face-api.js
-        const detectFace = async () => {
-          if (cameraRef.current && mlAlgorithm === true) {
-            const video = cameraRef.current.recordAsync();
-            if (video) {
-              const detections = await faceApi
-                .detectAllFaces(video)
-                .withFaceLandmarks()
-                .withFaceDescriptors();
-              setDetections(detections);
-              console.log("Detections:", detections);
-            }
-          }
-          requestAnimationFrame(detectFace); // Panggil ulang fungsi untuk terus-menerus mendeteksi
-        };
-
-        console.log("Detections:", detections); // Log hasil deteksi wajah
+      try {
+        const photo = await cameraRef.current.takePictureAsync();
+        setPhoto(photo.uri);
+      } catch (error) {
+        showAlertModal("Error", "Gagal mengambil foto.");
       }
+    } else {
+      showAlertModal("Error", "Kamera tidak siap.");
     }
   };
+
+  const resetPhoto = () => {
+    setPhoto(null);
+  };
+
+  const showAlertModal = (title: string, message: string) => {
+    setAlertData({ title, message });
+    setShowAlert(true);
+  };
+
+  const submitAttendance = async () => {
+    const user = auth().currentUser;
+
+    if (!user) {
+      showAlertModal("Error", "Anda harus login terlebih dahulu.");
+      return;
+    }
+
+    if (!photo || !location) {
+      showAlertModal("Error", "Foto dan lokasi diperlukan untuk absensi.");
+      return;
+    }
+
+    const today = new Date().toISOString().split("T")[0];
+    const attendanceRef = firestore()
+      .collection("attendance")
+      .where("userId", "==", user.uid)
+      .where("date", "==", today);
+
+    try {
+      const existingAttendance = await attendanceRef.get();
+      if (!existingAttendance.empty) {
+        showAlertModal("Error", "Anda sudah melakukan absensi hari ini.");
+        return;
+      }
+
+      const fileName = `${user.uid}_${Date.now()}.jpg`;
+      const photoURL = `https://via.placeholder.com/300?text=${fileName}`;
+
+      const attendanceData = {
+        userId: user.uid,
+        date: today,
+        location: {
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        },
+        photoURL,
+        timestamp: new Date().toISOString(),
+      };
+
+      await firestore().collection("attendance").add(attendanceData);
+
+      showAlertModal("Success", "Absensi berhasil disimpan.");
+      setPhoto(null);
+    } catch (error) {
+      showAlertModal("Error", "Terjadi kesalahan saat menyimpan absensi.");
+    }
+  };
+
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        setErrorMsg("Permission to access location was denied");
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      setLocation(location);
+    })();
+  }, []);
 
   if (!permission) {
     return <View />;
@@ -118,55 +135,148 @@ const Attendance = () => {
     );
   }
 
-  const toggleCameraFacing = () => {
-    setFacing((prevFacing) => (prevFacing === "back" ? "front" : "back"));
-  };
-
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="black" />
-      <HeaderAttendance />
-      <CameraView
-        style={styles.camera}
-        facing={facing}
-        ref={cameraRef}
-        onCameraReady={() => setIsCameraReady(true)} // Menandakan kamera siap
-        onMountError={(error) => console.log("Camera Mount Error", error)} // Menangani error saat mount kamera
-      >
-        {/* Canvas untuk menampilkan hasil video stream */}
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <HeaderAttendance />
+        <View style={styles.cameraContainer}>
+          {!photo ? (
+            <CameraView style={styles.camera} facing={facing} ref={cameraRef} />
+          ) : (
+            <Image source={{ uri: photo }} style={styles.camera} />
+          )}
+        </View>
 
-        {detections && detections.length > 0 && (
-          <View style={styles.overlay}>
-            {detections.map((detection: any, index: number) => {
-              const { alignedRect } = detection;
-              const { x, y, width, height } = alignedRect;
-              return (
-                <View
-                  key={index}
-                  style={[styles.faceBox, { top: y, left: x, width, height }]}
-                />
-              );
-            })}
-          </View>
+        {!photo ? (
+          <>
+            <TouchableOpacity
+              onPress={toggleCameraFacing}
+              style={styles.buttonFlip}
+            >
+              <Text style={styles.buttonText}>Flip Camera</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={takePhoto} style={styles.button}>
+              <Text style={styles.buttonText}>Take Photo</Text>
+            </TouchableOpacity>
+          </>
+        ) : (
+          <>
+            <TouchableOpacity onPress={submitAttendance} style={styles.button}>
+              <Text style={styles.buttonText}>Submit Absensi</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={resetPhoto} style={styles.button}>
+              <Text style={styles.buttonText}>Retake Photo</Text>
+            </TouchableOpacity>
+          </>
         )}
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity onPress={toggleCameraFacing} style={styles.button}>
-            <Text style={styles.buttonText}>Flip Camera</Text>
+
+        {location ? (
+          <MapView
+            style={styles.map}
+            region={{
+              latitude: location.coords.latitude,
+              longitude: location.coords.longitude,
+              latitudeDelta: 0.01,
+              longitudeDelta: 0.01,
+            }}
+          >
+            <Marker
+              coordinate={{
+                latitude: location.coords.latitude,
+                longitude: location.coords.longitude,
+              }}
+              title="Lokasi Anda"
+            />
+          </MapView>
+        ) : (
+          <Text>No location data</Text>
+        )}
+      </ScrollView>
+
+      {/* Modern Alert */}
+      <Modal isVisible={showAlert} onBackdropPress={() => setShowAlert(false)}>
+        <View style={styles.alertContainer}>
+          <Text style={styles.alertTitle}>{alertData.title}</Text>
+          <Text style={styles.alertMessage}>{alertData.message}</Text>
+          <TouchableOpacity
+            onPress={() => setShowAlert(false)}
+            style={styles.alertButton}
+          >
+            <Text style={styles.alertButtonText}>OK</Text>
           </TouchableOpacity>
         </View>
-      </CameraView>
-      {/* <View style={styles.buttonContainer}>
-        <TouchableOpacity onPress={detectFace} style={styles.button}>
-          <Text style={styles.buttonText}>Detect Faces</Text>
-        </TouchableOpacity>
-      </View> */}
+      </Modal>
     </SafeAreaView>
   );
-};
-
-export default Attendance;
+}
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingHorizontal: 20,
+    backgroundColor: "white",
+  },
+  cameraContainer: {
+    width: "100%",
+    height: 300,
+  },
+  camera: {
+    width: "100%",
+    height: 300,
+  },
+  button: {
+    backgroundColor: Colors.light.darkBlue,
+    paddingVertical: 10,
+    paddingHorizontal: 40,
+    borderRadius: 10,
+    alignItems: "center",
+    marginTop: 10,
+  },
+  buttonFlip: {
+    backgroundColor: Colors.light.darkBlue,
+    paddingVertical: 10,
+    paddingHorizontal: 40,
+    alignItems: "center",
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  buttonText: {
+    color: "white",
+    fontSize: 16,
+  },
+  map: {
+    width: "100%",
+    height: 230,
+    borderRadius: 20,
+    marginTop: 10,
+  },
+  alertContainer: {
+    backgroundColor: "white",
+    borderRadius: 10,
+    padding: 20,
+    alignItems: "center",
+  },
+  alertTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  alertMessage: {
+    fontSize: 16,
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  alertButton: {
+    backgroundColor: Colors.light.darkBlue,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 5,
+  },
+  alertButtonText: {
+    color: "white",
+    fontSize: 16,
+  },
   containerPermission: {
     flex: 1,
     justifyContent: "center",
@@ -180,55 +290,5 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     color: "#333",
     fontFamily: "Poppins-Regular",
-  },
-  buttonContainer: {
-    position: "absolute",
-    bottom: 20,
-    left: 0,
-    right: 0,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  button: {
-    backgroundColor: Colors.light.darkBlue,
-    paddingVertical: 10,
-    paddingHorizontal: 40,
-    borderRadius: 10,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  buttonText: {
-    color: "white",
-    fontFamily: "Poppins-SemiBold",
-    fontSize: 16,
-    textAlign: "center",
-  },
-  container: {
-    flex: 1,
-    paddingHorizontal: 20,
-    backgroundColor: "white",
-  },
-  camera: {
-    height: "45%",
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 20,
-    position: "relative",
-  },
-  overlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 10,
-  },
-  faceBox: {
-    borderColor: "red",
-    borderWidth: 2,
-    position: "absolute",
-    zIndex: 20,
   },
 });

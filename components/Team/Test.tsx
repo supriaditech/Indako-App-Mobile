@@ -121,7 +121,6 @@ const CreateOrganizationPage: React.FC = () => {
     try {
       for (const member of organizationData) {
         await firestore().collection("organization").add(member);
-        console.log(`Added: ${member.name}`);
       }
       Alert.alert("Success", "Organization data has been added!");
     } catch (error) {
